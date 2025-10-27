@@ -1,0 +1,211 @@
+{
+  "sales": [
+    { "name": "Jan", "sales": 4200 },
+    { "name": "Feb", "sales": 3800 },
+    { "name": "Mar", "sales": 5100 },
+    { "name": "Apr", "sales": 4600 },
+    { "name": "May", "sales": 5400 },
+    { "name": "Jun", "sales": 7200 },
+    { "name": "Jul", "sales": 6100 },
+    { "name": "Aug", "sales": 2900 },
+    { "name": "Sep", "sales": 6800 },
+    { "name": "Oct", "sales": 6300 },
+    { "name": "Nov", "sales": 7100 },
+    { "name": "Dec", "sales": 7500 }
+  ],
+  "categories": [
+    { "name": "Smartphones", "value": 5200 },
+    { "name": "Laptops", "value": 4300 },
+    { "name": "Furniture", "value": 3100 },
+    { "name": "Beauty & Personal Care", "value": 2700 },
+    { "name": "Gaming Accessories", "value": 2200 }
+  ],
+  "orderStatus": [
+    { "name": "Pending", "value": 60 },
+    { "name": "Processing", "value": 45 },
+    { "name": "Canceled", "value": 30 },
+    { "name": "Delivered", "value": 120 }
+  ],
+  "productPerformance": [
+    {
+      "name": "Smartphone",
+      "Retention": 5200,
+      "Revenue": 3100,
+      "Profit": 2800
+    },
+    { "name": "Laptop", "Retention": 4300, "Revenue": 2700, "Profit": 3400 },
+    {
+      "name": "Coffee Table",
+      "Retention": 3100,
+      "Revenue": 6900,
+      "Profit": 4100
+    },
+    { "name": "Mouse", "Retention": 2500, "Revenue": 4200, "Profit": 2700 },
+    {
+      "name": "Running Shoes",
+      "Retention": 2000,
+      "Revenue": 9000,
+      "Profit": 2900
+    }
+  ],
+  "orders": [
+    {
+      "id": "#A7B9D31",
+      "client": "Ethan Carter",
+      "email": "Ethan.Carter@example.com",
+      "total": 174.5,
+      "status": "Delivered",
+      "date": "Jan 30, 2025",
+      "country": "United States"
+    },
+    {
+      "id": "#X4Y2Z85",
+      "client": "Sophia Mitchell",
+      "email": "Sophia.Mitchell@example.co.uk",
+      "total": 632.0,
+      "status": "Pending",
+      "date": "Feb 23, 2025",
+      "country": "United Kingdom"
+    },
+    {
+      "id": "#M6N3P74",
+      "client": "Liam Harrison",
+      "email": "Liam.Harrison@example.de",
+      "total": 202.5,
+      "status": "Delivered",
+      "date": "Dec 25, 2024",
+      "country": "Germany"
+    },
+    {
+      "id": "#K9L8T62",
+      "client": "Ava Bennett",
+      "email": "Ava.Bennett@example.in",
+      "total": 330.0,
+      "status": "Canceled",
+      "date": "Mar 22, 2025",
+      "country": "India"
+    },
+    {
+      "id": "#Q5R7W30",
+      "client": "Noah Reynolds",
+      "email": "Noah.Reynolds@example.au",
+      "total": 595.5,
+      "status": "Delivered",
+      "date": "Mar 5, 2025",
+      "country": "Australia"
+    }
+  ],
+  "orderStats": [
+    { "name": "Total Orders", "value": "15,240", "icon": "ShoppingBag" },
+    { "name": "Completed Orders", "value": "13,500", "icon": "CheckCircle" },
+    { "name": "Pending Orders", "value": "1,120", "icon": "Clock" },
+    { "name": "Canceled Orders", "value": "620", "icon": "Ban" }
+  ],
+  "products": [
+    {
+      "id": "#A7F3D67",
+      "name": "Smartphone",
+      "category": "Electronics",
+      "price": 699.99,
+      "stock": 120,
+      "sales": 5200,
+      "image": "/images/phone.jpg"
+    },
+    {
+      "id": "#B6E4F24",
+      "name": "Laptop",
+      "category": "Electronics",
+      "price": 1299.99,
+      "stock": 75,
+      "sales": 4300,
+      "image": "/images/laptop.jpg"
+    },
+    {
+      "id": "#C5D2A89",
+      "name": "Coffee Table",
+      "category": "Home",
+      "price": 249.99,
+      "stock": 95,
+      "sales": 3100,
+      "image": "/images/table.jpg"
+    },
+    {
+      "id": "#D4B7C34",
+      "name": "Mouse",
+      "category": "Electronics",
+      "price": 49.99,
+      "stock": 180,
+      "sales": 2500,
+      "image": "/images/mouse.jpg"
+    },
+    {
+      "id": "#E3A5623",
+      "name": "Running Shoes",
+      "category": "Sports",
+      "price": 119.99,
+      "stock": 200,
+      "sales": 2000,
+      "image": "/images/shoes.jpg"
+    }
+  ],
+  "salesByCategory": [
+    { "name": "Electronics", "value": 400 },
+    { "name": "Clothing", "value": 300 },
+    { "name": "Home & Garden", "value": 200 },
+    { "name": "Books", "value": 100 },
+    { "name": "Others", "value": 150 }
+  ],
+  "clients": [
+    {
+      "id": 1,
+      "name": "Ethan Carter",
+      "email": "Ethan.Carter@example.com",
+      "phoneNumber": "+1 415-678-9023",
+      "country": "United States",
+      "image": "/images/user1.jpg"
+    },
+    {
+      "id": 2,
+      "name": "Sophia Mitchell",
+      "email": "Sophia.Mitchell@example.com",
+      "phoneNumber": "+44 7911 123456",
+      "country": "United Kingdom",
+      "image": "/images/user2.jpg"
+    },
+    {
+      "id": 3,
+      "name": "Liam Harrison",
+      "email": "Liam.Harrison@example.com",
+      "phoneNumber": "+49 1523 4567890",
+      "country": "Germany",
+      "image": "/images/user3.jpg"
+    },
+    {
+      "id": 4,
+      "name": "Ava Bennett",
+      "email": "Ava.Bennett@example.com",
+      "phoneNumber": "+91 98765 43210",
+      "country": "India",
+      "image": "/images/user4.jpg"
+    },
+    {
+      "id": 5,
+      "name": "Noah Reynolds",
+      "email": "Noah.Reynolds@example.com",
+      "phoneNumber": "+61 412 345 678",
+      "country": "Australia",
+      "image": "/images/user5.jpg"
+    }
+  ],
+  "sidebarItems": [
+    { "name": "Dashboard", "icon": "House", "href": "/" },
+    { "name": "Products", "icon": "ShoppingBag", "href": "/products" },
+    { "name": "Clients", "icon": "Users", "href": "/users" },
+    { "name": "Sales", "icon": "DollarSign", "href": "/sales" },
+    { "name": "Orders", "icon": "ShoppingCart", "href": "/orders" },
+    { "name": "Settings", "icon": "Settings", "href": "" },
+    { "name": "Messages", "icon": "Mail", "href": "" },
+    { "name": "Notifications", "icon": "Bell", "href": "" },
+    { "name": "Help", "icon": "Info", "href": "" }
+  ]
+}

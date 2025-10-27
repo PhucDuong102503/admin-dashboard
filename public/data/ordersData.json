@@ -1,0 +1,24 @@
+{
+  "orderStats": [
+    {
+      "name": "Pending Orders",
+      "value": 32,
+      "icon": "Clock"
+    },
+    {
+      "name": "Completed Orders",
+      "value": 120,
+      "icon": "CheckCircle"
+    },
+    {
+      "name": "Cancelled Orders",
+      "value": 8,
+      "icon": "Ban"
+    },
+    {
+      "name": "Total Orders",
+      "value": 160,
+      "icon": "ShoppingBag"
+    }
+  ]
+}

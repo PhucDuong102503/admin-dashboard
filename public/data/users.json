@@ -1,0 +1,20 @@
+{
+  "users": [
+    {
+      "id": 1,
+      "hoten": "Nguyễn Văn A",
+      "email": "vana@gmail.com",
+      "sodienthoai": "0987654321",
+      "diachi": "Hà Nội",
+      "vaitro": "admin"
+    },
+    {
+      "id": 2,
+      "hoten": "Trần Thị B",
+      "email": "thib@gmail.com",
+      "sodienthoai": "0912345678",
+      "diachi": "TP.HCM",
+      "vaitro": "user"
+    }
+  ]
+}

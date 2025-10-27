@@ -1,6 +1,10 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
+// Gọi Sidebar trước tiên
+import Sidebar from "../components/Sidebar";
+import Header from "../components/Header";
+
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -18,11 +22,24 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        {children}
+    <html
+      lang="en"
+      className={`${geistSans.variable} ${geistMono.variable} antialiased bg-[#121212]`}
+    >
+      <body className="flex h-screen overflow-hidden">
+        {/* Sidebar nằm bên trái */}
+        <Sidebar />
+
+        {/* Phần nội dung chính */}
+        <div className="flex flex-col flex-1 overflow-auto bg-white text-black">
+          {/* Header nằm trong nội dung */}
+          <Header />
+
+          {/* Nội dung trang */}
+          <main className="flex-1 px-6 py-6 max-w-7xl mx-auto w-full">
+            {children}
+          </main>
+        </div>
       </body>
     </html>
   );
