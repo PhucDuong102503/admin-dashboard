@@ -3,11 +3,26 @@ import pool from "@/lib/connect";
 // 🟢 PUT - Cập nhật sản phẩm
 export async function PUT(req, { params }) {
   try {
-    const { id } = params;
-    const body = await req.json();
-    console.log(body)
-    const { tensanpham = '', giasanpham='', motasanpham='', idloaisanpham='', hinhanhsanpham='' } = body;
+    const { id } = await params;
+    const formData = await req.formData();
 
+    const tensanpham = formData.get('tensanpham') || '';
+    const giasanpham = formData.get('giasanpham') || '';
+    const motasanpham = formData.get('motasanpham') || '';
+    const idloaisanpham = formData.get('idloaisanpham') || '';
+    let hinhanhsanpham = formData.get('hinhanhsanpham') || '';
+
+    const file = formData.get('file'); // nếu có file mới upload
+    // if (file && typeof file === 'object' && file.name) {
+    //   const bytes = await file.arrayBuffer();
+    //   const buffer = Buffer.from(bytes);
+    //   const fileName = `${Date.now()}-${file.name}`;
+    //   const filePath = path.join(process.cwd(), 'public/uploads', fileName);
+    //   await writeFile(filePath, buffer);
+    //   hinhanhsanpham = `/uploads/${fileName}`;
+    // }
+
+    // ⚙️ Cập nhật DB
     const [result] = await pool.execute(
       `UPDATE thoitrang.sanpham
        SET tensanpham = ?, giasanpham = ?, motasanpham = ?, idloaisanpham = ?, hinhanhsanpham = ?

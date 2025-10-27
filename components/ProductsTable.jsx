@@ -47,11 +47,24 @@ const ProductsTable = () => {
     const product = products.find((p) => p.id === editingRow);
     if (!product) return;
 
+    const formData = new FormData()
+    formData.append("id", product.id)
+    formData.append("tensanpham", product.tensanpham)
+    formData.append("giasanpham", product.giasanpham)
+    formData.append("motasanpham", product.motasanpham)
+    formData.append("idloaisanpham", product.idloaisanpham)
+    formData.append("tenloaisanpham", product.tenloaisanpham)
+    formData.append("hinhanhsanpham", product.hinhanhsanpham)
+    formData.append("stock", product.stock)
+    formData.append("sales", product.sales)
+    console.log(newProduct)
+    formData.append("file", newProduct.file)
+
     try {
       const res = await fetch(`/api/products/${product.id}`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(product),
+        // headers: { "Content-Type": "application/json" },
+        body: formData
       });
 
       if (res.ok) {
@@ -244,21 +257,24 @@ const ProductsTable = () => {
             type="file"
             accept="image/*"
             onChange={(e) => {
-              const file = e.target.files[0];
+              const file = e.target.files?.[0];
               if (file) {
                 if (file.size > 2 * 1024 * 1024) {
-                  alert("Ảnh quá lớn, vui lòng chọn ảnh dưới 2MB.");
+                  alert('Ảnh quá lớn, vui lòng chọn ảnh dưới 2MB.');
                   return;
                 }
                 const reader = new FileReader();
-                reader.onloadend = () => {
-                  setNewProduct((prev) => ({
-                    ...prev,
-                    hinhanhsanpham: file,
-                    preview: reader.result,
-                  }));
-                };
+                // reader.onloadend = () => {
+                //   setNewProduct((prev) => ({
+                //     ...prev,
+                //     hinhanhsanpham: file,
+                //     file,
+                //     preview: reader.result,
+                //   }));
+                // };
+                console.log('file',file)
                 reader.readAsDataURL(file);
+                setImage(file)
               }
             }}
             className="text-white text-sm"
