@@ -16,19 +16,16 @@ export async function POST(req) {
       );
     }
 
-    // Tạo tên file duy nhất
     const timestamp = Date.now();
     const ext = file.name.split(".").pop();
     const filename = `avatar-${userId}-${timestamp}.${ext}`;
     const filepath = path.join(process.cwd(), "public", "uploads", filename);
 
-    // Lưu file vào thư mục public/uploads
     const buffer = Buffer.from(await file.arrayBuffer());
     await fs.writeFile(filepath, buffer);
 
     const imageUrl = `/uploads/${filename}`;
 
-    // Cập nhật đường dẫn ảnh vào DB
     await pool.query("UPDATE user SET hinhanh = ? WHERE id = ?", [imageUrl, userId]);
 
     return NextResponse.json({ success: true, url: imageUrl });

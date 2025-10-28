@@ -49,7 +49,7 @@ export async function PUT(req, { params }) {
   }
 }
 
-// 🔴 DELETE - Xóa sản phẩm
+// 🔴 DELETE - Xóa sản phẩm -- khả năng lỗi hàm này
 export async function DELETE(req, { params }) {
   try {
     const { id } = params;
