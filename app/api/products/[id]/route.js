@@ -1,4 +1,7 @@
 import pool from "@/lib/connect";
+import path from "path";
+import { writeFile } from "fs/promises";
+import fs from "fs";
 
 // 🟢 PUT - Cập nhật sản phẩm
 export async function PUT(req, { params }) {
@@ -10,17 +13,23 @@ export async function PUT(req, { params }) {
     const giasanpham = formData.get('giasanpham') || '';
     const motasanpham = formData.get('motasanpham') || '';
     const idloaisanpham = formData.get('idloaisanpham') || '';
-    let hinhanhsanpham = formData.get('hinhanhsanpham') || '';
+    let hinhanhsanpham = '';
 
-    const file = formData.get('file'); // nếu có file mới upload
-    // if (file && typeof file === 'object' && file.name) {
-    //   const bytes = await file.arrayBuffer();
-    //   const buffer = Buffer.from(bytes);
-    //   const fileName = `${Date.now()}-${file.name}`;
-    //   const filePath = path.join(process.cwd(), 'public/uploads', fileName);
-    //   await writeFile(filePath, buffer);
-    //   hinhanhsanpham = `/uploads/${fileName}`;
-    // }
+    const file = formData.get('file');
+    if (file && typeof file === "object" && file.name) {
+      const bytes = await file.arrayBuffer();
+      const buffer = Buffer.from(bytes);
+
+      const uploadDir = path.join(process.cwd(), "public/uploads");
+      // ✅ Tạo thư mục nếu chưa có
+      if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
+
+      const fileName = `${Date.now()}-${file.name}`;
+      const filePath = path.join(uploadDir, fileName);
+      await writeFile(filePath, buffer);
+
+      hinhanhsanpham = `/uploads/${fileName}`;
+    }
 
     // ⚙️ Cập nhật DB
     const [result] = await pool.execute(

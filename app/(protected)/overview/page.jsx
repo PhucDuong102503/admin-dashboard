@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import StatCard from "../../components/StatCard";
+import StatCard from "@/components/StatCard";
 import { DollarSign, ShoppingBag, SquareActivity, Users } from "lucide-react";
 import { motion } from "framer-motion";
 import SalesOverviewChart from "@/components/SalesOverviewChart";
