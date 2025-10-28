@@ -1,4 +1,3 @@
-// app/components/UsersTable.jsx  (hoặc đường dẫn file client hiện tại của bạn)
 "use client";
 
 import React, { useEffect, useState } from "react";
@@ -8,18 +7,17 @@ import { Search, Edit, Trash2, Check, X, Ban, CheckCircle } from "lucide-react";
 export default function UsersTable() {
   const [searchTerm, setSearchTerm] = useState("");
   const [users, setUsers] = useState([]);
-  const [roles, setRoles] = useState([]); // danh sách role từ DB
+  const [roles, setRoles] = useState([]);
   const [editingRow, setEditingRow] = useState(null);
-  const [editForm, setEditForm] = useState({}); // lưu tạm dữ liệu đang edit
+  const [editForm, setEditForm] = useState({});
   const [loading, setLoading] = useState(false);
 
-  // load users + roles
+  // ✅ load users + roles
   useEffect(() => {
     fetch("/api/users")
       .then((res) => res.json())
       .then((data) => {
-        if (data && Array.isArray(data.users)) setUsers(data.users);
-        else if (data && data.users) setUsers(data.users);
+        if (Array.isArray(data.users)) setUsers(data.users);
         else console.error("Dữ liệu user không hợp lệ:", data);
       })
       .catch((err) => console.error("Lỗi khi load users:", err));
@@ -27,16 +25,16 @@ export default function UsersTable() {
     fetch("/api/roles")
       .then((res) => res.json())
       .then((data) => {
-        if (data && data.roles) setRoles(data.roles);
+        if (data.roles) setRoles(data.roles);
       })
       .catch((err) => console.error("Lỗi khi load roles:", err));
   }, []);
 
-  const filteredUsers = users.filter((user) =>
-    (user.hoten || "").toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredUsers = users.filter((u) =>
+    (u.hoten || "").toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  // bắt đầu edit: lưu dữ liệu hiện tại vào editForm
+  // ✅ Khi click "chỉnh sửa"
   const handleEditClick = (user) => {
     setEditingRow(user.id);
     setEditForm({
@@ -45,109 +43,78 @@ export default function UsersTable() {
       email: user.email || "",
       sodienthoai: user.sodienthoai || "",
       diachi: user.diachi || "",
-      vaitro: user.vaitro || "",
       role_id: user.role_id || "",
     });
   };
 
-  // huỷ edit và quay lại dữ liệu cũ
   const handleCancelEdit = () => {
     setEditingRow(null);
     setEditForm({});
   };
 
-  // thay đổi ô input khi edit
   const handleChange = (field, value) => {
     setEditForm((prev) => ({ ...prev, [field]: value }));
   };
 
+  // ✅ Khi bấm "Lưu"
   const handleSaveClick = async () => {
-    if (!editForm || !editForm.id) {
-      console.error("handleSaveClick - missing id in editForm:", editForm);
-      alert("Thiếu ID người dùng. Không thể lưu.");
-      return;
-    }
+    if (!editForm.id) return alert("Thiếu ID người dùng.");
 
     setLoading(true);
-
-    // lưu bản sao để rollback khi lỗi
     const originalUsers = [...users];
 
     try {
-      const id = encodeURIComponent(editForm.id);
-
-      // chuẩn body theo backend của bạn (vaitro tên role là ok)
-      const payload = {
-        name: editForm.hoten,
-        email: editForm.email,
-        phone: editForm.sodienthoai,
-        role: editForm.vaitro,
-        status: editForm.status,
-        vaitro: editForm.vaitro,
-        address: editForm.diachi,
-        role_id: editForm.role_id,
-      };
-
-      // gọi PATCH (server route của bạn đang dùng PATCH để update)
-      const res = await fetch(`/api/users/${id}`, {
+      const res = await fetch(`/api/users/${encodeURIComponent(editForm.id)}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
+        body: JSON.stringify({
+          name: editForm.hoten,
+          email: editForm.email,
+          phone: editForm.sodienthoai,
+          address: editForm.diachi,
+          role_id: editForm.role_id,
+        }),
       });
 
-      // luôn parse JSON (vì server trả NextResponse.json)
       const data = await res.json();
 
-      if (!res.ok) {
-        console.error("PUT/PATCH response not ok:", res.status, data);
-        alert(data.message || "Cập nhật thất bại (server).");
-        // rollback local state
+      if (!res.ok || !data.success) {
+        alert(data.message || "Cập nhật thất bại");
         setUsers(originalUsers);
-      } else if (data.success) {
-        // cập nhật local state với dữ liệu editForm (giữ nguyên hoten nếu không chỉnh)
+      } else {
         setUsers((prev) =>
           prev.map((u) =>
             u.id === editForm.id
               ? {
                   ...u,
+                  hoten: editForm.hoten,
                   email: editForm.email,
                   sodienthoai: editForm.sodienthoai,
                   diachi: editForm.diachi,
-                  vaitro: editForm.vaitro,
+                  role_id: editForm.role_id,
+                  tenrole:
+                    roles.find((r) => r.id === editForm.role_id)?.tenrole ||
+                    u.tenrole,
                 }
               : u
           )
         );
         setEditingRow(null);
         setEditForm({});
-      } else {
-        console.error("PUT/PATCH response error body:", data);
-        alert(data.message || "Cập nhật thất bại");
-        setUsers(originalUsers);
       }
     } catch (err) {
       console.error("Lỗi khi update user:", err);
       alert("Lỗi mạng / server");
-      // rollback
-      setUsers((prev) => prev); // (or setUsers(originalUsers))
+      setUsers(originalUsers);
     } finally {
       setLoading(false);
     }
   };
 
-  // khi ban/unban (PATCH)
+  // ✅ Ban / Unban
   const handleBanToggle = async (id, currentStatus) => {
-    if (!id) {
-      console.error("handleBanToggle - missing id:", id);
-      return alert("Thiếu id");
-    }
+    if (!confirm(currentStatus ? "Mở khóa tài khoản này?" : "Khóa tài khoản này?")) return;
 
-    const confirmMsg = currentStatus
-      ? "Bạn có chắc muốn mở khóa tài khoản này?"
-      : "Bạn có chắc muốn khóa (ban) tài khoản này?";
-    if (!confirm(confirmMsg)) return;
-
-    // optimistic update: cập nhật UI ngay, rollback nếu lỗi
     const originalUsers = [...users];
     setUsers((prev) =>
       prev.map((u) =>
@@ -163,15 +130,9 @@ export default function UsersTable() {
       });
 
       const data = await res.json();
-
       if (!res.ok || !data.success) {
-        console.error("PATCH(ban) failed:", res.status, data);
         alert(data.message || "Thao tác thất bại");
-        // rollback
         setUsers(originalUsers);
-      } else {
-        // success — optional toast
-        // setUsers already updated optimistically
       }
     } catch (err) {
       console.error("Lỗi khi ban/unban:", err);
@@ -180,18 +141,9 @@ export default function UsersTable() {
     }
   };
 
-  // khi delete (DELETE)
+  // ✅ Xóa user
   const handleHardDelete = async (id) => {
-    if (!id) {
-      console.error("handleHardDelete - missing id:", id);
-      alert("Thiếu ID người dùng");
-      return;
-    }
-
-    if (!confirm("Xóa hoàn toàn người dùng này? Hành động không thể hoàn tác."))
-      return;
-
-    // optimistic: remove locally then restore on error
+    if (!confirm("Xóa hoàn toàn người dùng này?")) return;
     const originalUsers = [...users];
     setUsers((prev) => prev.filter((u) => u.id !== id));
 
@@ -202,12 +154,8 @@ export default function UsersTable() {
       const data = await res.json();
 
       if (!res.ok || !data.success) {
-        console.error("DELETE failed:", res.status, data);
         alert(data.message || "Xóa thất bại");
-        // rollback
         setUsers(originalUsers);
-      } else {
-        // success: already removed
       }
     } catch (err) {
       console.error("Lỗi khi xóa:", err);
@@ -246,23 +194,16 @@ export default function UsersTable() {
         <table className="min-w-full divide-y divide-gray-700">
           <thead>
             <tr>
-              {[
-                "#",
-                "Họ tên",
-                "Email",
-                "SĐT",
-                "Địa chỉ",
-                "Vai trò",
-                "Trạng thái",
-                "Hành động",
-              ].map((header) => (
-                <th
-                  key={header}
-                  className="px-3 md:px-6 py-3 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider"
-                >
-                  {header}
-                </th>
-              ))}
+              {["#", "Họ tên", "Email", "SĐT", "Địa chỉ", "Vai trò", "Trạng thái", "Hành động"].map(
+                (header) => (
+                  <th
+                    key={header}
+                    className="px-3 md:px-6 py-3 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider"
+                  >
+                    {header}
+                  </th>
+                )
+              )}
             </tr>
           </thead>
 
@@ -281,13 +222,10 @@ export default function UsersTable() {
                     {index + 1}
                   </td>
 
-                  {/* Họ tên (không edit) */}
                   <td className="px-3 md:px-6 py-3 text-sm text-gray-100">
                     {user.hoten}
-                    <input value={user.hoten} type="hidden" />
                   </td>
 
-                  {/* Email */}
                   <td className="px-3 md:px-6 py-3 text-sm text-gray-300">
                     {isEditing ? (
                       <input
@@ -300,7 +238,6 @@ export default function UsersTable() {
                     )}
                   </td>
 
-                  {/* SĐT */}
                   <td className="px-3 md:px-6 py-3 text-sm text-gray-300">
                     {isEditing ? (
                       <input
@@ -315,7 +252,6 @@ export default function UsersTable() {
                     )}
                   </td>
 
-                  {/* Địa chỉ */}
                   <td className="px-3 md:px-6 py-3 text-sm text-gray-300">
                     {isEditing ? (
                       <input
@@ -328,15 +264,13 @@ export default function UsersTable() {
                     )}
                   </td>
 
-                  {/* Vai trò */}
                   <td className="px-3 md:px-6 py-3 text-sm">
                     {isEditing ? (
                       <select
-                        value={editForm.vaitro}
-                        onChange={(e) => handleChange("vaitro", e.target.value)}
+                        value={editForm.role_id}
+                        onChange={(e) => handleChange("role_id", e.target.value)}
                         className="bg-[#2f2f2f] text-white px-2 py-1 rounded text-sm"
                       >
-                        {/* use roles fetched from DB */}
                         {roles.map((r) => (
                           <option key={r.id} value={r.id}>
                             {r.tenrole}
@@ -346,33 +280,26 @@ export default function UsersTable() {
                     ) : (
                       <span
                         className={`px-3 py-1 rounded-full text-xs font-medium ${
-                          user.vaitro === "Admin"
+                          user.tenrole === "Admin"
                             ? "bg-red-500/20 text-red-400"
                             : "bg-green-500/20 text-green-400"
                         }`}
                       >
-                        {user.vaitro}
+                        {user.tenrole}
                       </span>
                     )}
                   </td>
 
-                  {/* Trạng thái banned */}
                   <td className="px-3 md:px-6 py-3 text-sm text-gray-300">
                     {user.banned ? (
-                      <span className="text-red-400 font-medium">
-                        Đang bị khóa
-                      </span>
+                      <span className="text-red-400 font-medium">Đang bị khóa</span>
                     ) : (
-                      <span className="text-green-400 font-medium">
-                        Hoạt động
-                      </span>
+                      <span className="text-green-400 font-medium">Hoạt động</span>
                     )}
                   </td>
 
-                  {/* Hành động: icons */}
                   <td className="px-3 md:px-6 py-3 text-sm">
                     <div className="flex items-center gap-2">
-                      {/* Edit / Save / Cancel */}
                       {isEditing ? (
                         <>
                           <button
@@ -401,7 +328,6 @@ export default function UsersTable() {
                         </button>
                       )}
 
-                      {/* Ban / Unban */}
                       <button
                         onClick={() => handleBanToggle(user.id, user.banned)}
                         className={`p-2 rounded hover:bg-white/5 ${
@@ -409,19 +335,11 @@ export default function UsersTable() {
                         }`}
                         title={user.banned ? "Mở khóa" : "Khoá (ban)"}
                       >
-                        {user.banned ? (
-                          <CheckCircle size={16} />
-                        ) : (
-                          <Ban size={16} />
-                        )}
+                        {user.banned ? <CheckCircle size={16} /> : <Ban size={16} />}
                       </button>
 
-                      {/* Hard delete */}
                       <button
-                        onClick={() => {
-                          if (confirm("Xóa hoàn toàn người dùng?"))
-                            handleHardDelete(user.id);
-                        }}
+                        onClick={() => handleHardDelete(user.id)}
                         className="p-2 rounded hover:bg-white/5 text-red-600"
                         title="Xóa"
                       >

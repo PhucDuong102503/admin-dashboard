@@ -19,8 +19,13 @@ export default function LoginPage() {
     });
 
     if (res.ok) {
-      router.push("/overview");
-    } else {
+  const data = await res.json();
+
+  // Lưu thông tin người dùng vào localStorage
+  localStorage.setItem("user", JSON.stringify(data.user)); // hoặc data.result[0] tùy API trả về
+
+  router.push("/overview");
+} else {
       const data = await res.json();
       setError(data.message || "Đăng nhập thất bại");
     }

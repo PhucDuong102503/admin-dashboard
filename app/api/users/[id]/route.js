@@ -25,9 +25,16 @@ export async function GET(req, contextPromise) {
 
   try {
     const connection = await getConnection();
-    const [rows] = await connection.execute("SELECT * FROM user WHERE id = ?", [
-      id,
-    ]);
+
+    // ✅ Sửa phần truy vấn ở đây: JOIN với bảng role để lấy tên vai trò
+    const [rows] = await connection.execute(
+      `SELECT user.*, role.tenrole
+       FROM user
+       LEFT JOIN role ON user.role_id = role.id
+       WHERE user.id = ?`,
+      [id]
+    );
+
     await connection.end();
 
     if (rows.length === 0) {
@@ -64,7 +71,9 @@ export async function PATCH(req, { params }) {
 
     const connection = await getConnection();
     let result;
+
     if (banned !== undefined) {
+      // ✅ Cập nhật trạng thái bị cấm (banned)
       const [resp] = await connection.execute(
         `UPDATE user 
          SET banned = ?
@@ -73,15 +82,20 @@ export async function PATCH(req, { params }) {
       );
       result = resp;
     } else {
-      // if (role === "Customer") role = 2;
+      // ✅ Cập nhật thông tin user và role (kiểm tra role_id hợp lệ)
       const [resp] = await connection.execute(
         `UPDATE user 
-        SET hoten = ?, email = ?, sodienthoai = ?, role_id = ?, diachi = ?
-        WHERE id = ?`,
+         SET hoten = ?, 
+             email = ?, 
+             sodienthoai = ?, 
+             role_id = (SELECT id FROM role WHERE id = ? LIMIT 1), 
+             diachi = ?
+         WHERE id = ?`,
         [name, email, phone, role_id, address, id]
       );
       result = resp;
     }
+
     await connection.end();
 
     if (result.affectedRows === 0) {

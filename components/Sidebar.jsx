@@ -17,7 +17,6 @@ import { usePathname } from "next/navigation";
 import React, { useState } from "react";
 
 const sidebarItems = [
-  { name: "Dashboard", href: "/", icon: LayoutDashboard },
   { name: "Products", href: "/products", icon: Package },
   { name: "Clients", href: "/users", icon: Users },
   { name: "Sales", href: "/sales", icon: LineChart },

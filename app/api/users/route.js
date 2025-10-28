@@ -12,7 +12,7 @@ export async function GET() {
         u.sodienthoai,
         u.diachi,
         u.role_id,
-        r.tenrole AS vaitro,
+        r.tenrole AS tenrole,   -- ✅ Đổi alias này để trùng với frontend
         CAST(u.banned AS UNSIGNED) AS banned
       FROM thoitrang.\`user\` u
       LEFT JOIN thoitrang.\`role\` r ON u.role_id = r.id

@@ -12,6 +12,19 @@ export default function Header() {
   const menuRef = useRef(null);
   const router = useRouter();
 
+  const [userInfo, setUserInfo] = useState({ hoten: "", hinhanh: "" });
+
+useEffect(() => {
+  const storedUser = localStorage.getItem("user");
+  if (storedUser) {
+    const parsed = JSON.parse(storedUser);
+    setUserInfo({
+      hoten: parsed.hoten || "Admin",
+      hinhanh: parsed.hinhanh || "/images/admin.jpg",
+    });
+  }
+}, []);
+
   // Đóng dropdown khi click ra ngoài
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -50,15 +63,15 @@ export default function Header() {
             className="flex items-center space-x-2 cursor-pointer select-none"
           >
             <Image
-              src={admin}
-              alt="Admin"
-              width={35}
-              height={35}
-              className="rounded-full"
-            />
-            <span className="hidden sm:block font-medium text-white">
-              John Mark
-            </span>
+  src={userInfo.hinhanh}
+  alt="Avatar"
+  width={35}
+  height={35}
+  className="rounded-full"
+/>
+<span className="hidden sm:block font-medium text-white">
+  {userInfo.hoten}
+</span>
           </div>
 
           {/* Dropdown menu */}
