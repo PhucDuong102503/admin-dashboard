@@ -41,10 +41,12 @@ export default function UsersTable() {
     setEditingRow(user.id);
     setEditForm({
       id: user.id,
+      hoten: user.hoten || "",
       email: user.email || "",
       sodienthoai: user.sodienthoai || "",
       diachi: user.diachi || "",
       vaitro: user.vaitro || "",
+      role_id: user.role_id || "",
     });
   };
 
@@ -59,151 +61,160 @@ export default function UsersTable() {
     setEditForm((prev) => ({ ...prev, [field]: value }));
   };
 
- const handleSaveClick = async () => {
-  if (!editForm || !editForm.id) {
-    console.error("handleSaveClick - missing id in editForm:", editForm);
-    alert("Thiếu ID người dùng. Không thể lưu.");
-    return;
-  }
-
-  setLoading(true);
-
-  // lưu bản sao để rollback khi lỗi
-  const originalUsers = [...users];
-
-  try {
-    const id = encodeURIComponent(editForm.id);
-
-    // chuẩn body theo backend của bạn (vaitro tên role là ok)
-    const payload = {
-      email: editForm.email,
-      sodienthoai: editForm.sodienthoai,
-      diachi: editForm.diachi,
-      vaitro: editForm.vaitro,
-    };
-
-    // gọi PATCH (server route của bạn đang dùng PATCH để update)
-    const res = await fetch(`/api/users/${id}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
-
-    // luôn parse JSON (vì server trả NextResponse.json)
-    const data = await res.json();
-
-    if (!res.ok) {
-      console.error("PUT/PATCH response not ok:", res.status, data);
-      alert(data.message || "Cập nhật thất bại (server).");
-      // rollback local state
-      setUsers(originalUsers);
-    } else if (data.success) {
-      // cập nhật local state với dữ liệu editForm (giữ nguyên hoten nếu không chỉnh)
-      setUsers((prev) =>
-        prev.map((u) =>
-          u.id === editForm.id
-            ? {
-                ...u,
-                email: editForm.email,
-                sodienthoai: editForm.sodienthoai,
-                diachi: editForm.diachi,
-                vaitro: editForm.vaitro,
-              }
-            : u
-        )
-      );
-      setEditingRow(null);
-      setEditForm({});
-    } else {
-      console.error("PUT/PATCH response error body:", data);
-      alert(data.message || "Cập nhật thất bại");
-      setUsers(originalUsers);
+  const handleSaveClick = async () => {
+    if (!editForm || !editForm.id) {
+      console.error("handleSaveClick - missing id in editForm:", editForm);
+      alert("Thiếu ID người dùng. Không thể lưu.");
+      return;
     }
-  } catch (err) {
-    console.error("Lỗi khi update user:", err);
-    alert("Lỗi mạng / server");
-    // rollback
-    setUsers((prev) => prev); // (or setUsers(originalUsers))
-  } finally {
-    setLoading(false);
-  }
-};
 
-// khi ban/unban (PATCH)
-const handleBanToggle = async (id, currentStatus) => {
-  if (!id) {
-    console.error("handleBanToggle - missing id:", id);
-    return alert("Thiếu id");
-  }
+    setLoading(true);
 
-  const confirmMsg = currentStatus
-    ? "Bạn có chắc muốn mở khóa tài khoản này?"
-    : "Bạn có chắc muốn khóa (ban) tài khoản này?";
-  if (!confirm(confirmMsg)) return;
+    // lưu bản sao để rollback khi lỗi
+    const originalUsers = [...users];
 
-  // optimistic update: cập nhật UI ngay, rollback nếu lỗi
-  const originalUsers = [...users];
-  setUsers((prev) => prev.map((u) => (u.id === id ? { ...u, banned: currentStatus ? 0 : 1 } : u)));
+    try {
+      const id = encodeURIComponent(editForm.id);
 
-  try {
-    const res = await fetch(`/api/users/${encodeURIComponent(id)}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ banned: currentStatus ? 0 : 1 }),
-    });
+      // chuẩn body theo backend của bạn (vaitro tên role là ok)
+      const payload = {
+        name: editForm.hoten,
+        email: editForm.email,
+        phone: editForm.sodienthoai,
+        role: editForm.vaitro,
+        status: editForm.status,
+        vaitro: editForm.vaitro,
+        address: editForm.diachi,
+        role_id: editForm.role_id,
+      };
 
-    const data = await res.json();
+      // gọi PATCH (server route của bạn đang dùng PATCH để update)
+      const res = await fetch(`/api/users/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
 
-    if (!res.ok || !data.success) {
-      console.error("PATCH(ban) failed:", res.status, data);
-      alert(data.message || "Thao tác thất bại");
+      // luôn parse JSON (vì server trả NextResponse.json)
+      const data = await res.json();
+
+      if (!res.ok) {
+        console.error("PUT/PATCH response not ok:", res.status, data);
+        alert(data.message || "Cập nhật thất bại (server).");
+        // rollback local state
+        setUsers(originalUsers);
+      } else if (data.success) {
+        // cập nhật local state với dữ liệu editForm (giữ nguyên hoten nếu không chỉnh)
+        setUsers((prev) =>
+          prev.map((u) =>
+            u.id === editForm.id
+              ? {
+                  ...u,
+                  email: editForm.email,
+                  sodienthoai: editForm.sodienthoai,
+                  diachi: editForm.diachi,
+                  vaitro: editForm.vaitro,
+                }
+              : u
+          )
+        );
+        setEditingRow(null);
+        setEditForm({});
+      } else {
+        console.error("PUT/PATCH response error body:", data);
+        alert(data.message || "Cập nhật thất bại");
+        setUsers(originalUsers);
+      }
+    } catch (err) {
+      console.error("Lỗi khi update user:", err);
+      alert("Lỗi mạng / server");
       // rollback
-      setUsers(originalUsers);
-    } else {
-      // success — optional toast
-      // setUsers already updated optimistically
+      setUsers((prev) => prev); // (or setUsers(originalUsers))
+    } finally {
+      setLoading(false);
     }
-  } catch (err) {
-    console.error("Lỗi khi ban/unban:", err);
-    alert("Lỗi mạng / server");
-    setUsers(originalUsers);
-  }
-};
+  };
 
-// khi delete (DELETE)
-const handleHardDelete = async (id) => {
-  if (!id) {
-    console.error("handleHardDelete - missing id:", id);
-    alert("Thiếu ID người dùng");
-    return;
-  }
-
-  if (!confirm("Xóa hoàn toàn người dùng này? Hành động không thể hoàn tác.")) return;
-
-  // optimistic: remove locally then restore on error
-  const originalUsers = [...users];
-  setUsers((prev) => prev.filter((u) => u.id !== id));
-
-  try {
-    const res = await fetch(`/api/users/${encodeURIComponent(id)}`, {
-      method: "DELETE",
-    });
-    const data = await res.json();
-
-    if (!res.ok || !data.success) {
-      console.error("DELETE failed:", res.status, data);
-      alert(data.message || "Xóa thất bại");
-      // rollback
-      setUsers(originalUsers);
-    } else {
-      // success: already removed
+  // khi ban/unban (PATCH)
+  const handleBanToggle = async (id, currentStatus) => {
+    if (!id) {
+      console.error("handleBanToggle - missing id:", id);
+      return alert("Thiếu id");
     }
-  } catch (err) {
-    console.error("Lỗi khi xóa:", err);
-    alert("Lỗi mạng / server");
-    setUsers(originalUsers);
-  }
-};
+
+    const confirmMsg = currentStatus
+      ? "Bạn có chắc muốn mở khóa tài khoản này?"
+      : "Bạn có chắc muốn khóa (ban) tài khoản này?";
+    if (!confirm(confirmMsg)) return;
+
+    // optimistic update: cập nhật UI ngay, rollback nếu lỗi
+    const originalUsers = [...users];
+    setUsers((prev) =>
+      prev.map((u) =>
+        u.id === id ? { ...u, banned: currentStatus ? 0 : 1 } : u
+      )
+    );
+
+    try {
+      const res = await fetch(`/api/users/${encodeURIComponent(id)}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ banned: currentStatus ? 0 : 1 }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok || !data.success) {
+        console.error("PATCH(ban) failed:", res.status, data);
+        alert(data.message || "Thao tác thất bại");
+        // rollback
+        setUsers(originalUsers);
+      } else {
+        // success — optional toast
+        // setUsers already updated optimistically
+      }
+    } catch (err) {
+      console.error("Lỗi khi ban/unban:", err);
+      alert("Lỗi mạng / server");
+      setUsers(originalUsers);
+    }
+  };
+
+  // khi delete (DELETE)
+  const handleHardDelete = async (id) => {
+    if (!id) {
+      console.error("handleHardDelete - missing id:", id);
+      alert("Thiếu ID người dùng");
+      return;
+    }
+
+    if (!confirm("Xóa hoàn toàn người dùng này? Hành động không thể hoàn tác."))
+      return;
+
+    // optimistic: remove locally then restore on error
+    const originalUsers = [...users];
+    setUsers((prev) => prev.filter((u) => u.id !== id));
+
+    try {
+      const res = await fetch(`/api/users/${encodeURIComponent(id)}`, {
+        method: "DELETE",
+      });
+      const data = await res.json();
+
+      if (!res.ok || !data.success) {
+        console.error("DELETE failed:", res.status, data);
+        alert(data.message || "Xóa thất bại");
+        // rollback
+        setUsers(originalUsers);
+      } else {
+        // success: already removed
+      }
+    } catch (err) {
+      console.error("Lỗi khi xóa:", err);
+      alert("Lỗi mạng / server");
+      setUsers(originalUsers);
+    }
+  };
 
   return (
     <motion.div
@@ -235,16 +246,23 @@ const handleHardDelete = async (id) => {
         <table className="min-w-full divide-y divide-gray-700">
           <thead>
             <tr>
-              {["#", "Họ tên", "Email", "SĐT", "Địa chỉ", "Vai trò", "Trạng thái", "Hành động"].map(
-                (header) => (
-                  <th
-                    key={header}
-                    className="px-3 md:px-6 py-3 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider"
-                  >
-                    {header}
-                  </th>
-                )
-              )}
+              {[
+                "#",
+                "Họ tên",
+                "Email",
+                "SĐT",
+                "Địa chỉ",
+                "Vai trò",
+                "Trạng thái",
+                "Hành động",
+              ].map((header) => (
+                <th
+                  key={header}
+                  className="px-3 md:px-6 py-3 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider"
+                >
+                  {header}
+                </th>
+              ))}
             </tr>
           </thead>
 
@@ -259,10 +277,15 @@ const handleHardDelete = async (id) => {
                   transition={{ duration: 0.2 }}
                   className="hover:bg-[#2a2a2a] transition duration-150"
                 >
-                  <td className="px-3 md:px-6 py-3 text-sm text-gray-400">{index + 1}</td>
+                  <td className="px-3 md:px-6 py-3 text-sm text-gray-400">
+                    {index + 1}
+                  </td>
 
                   {/* Họ tên (không edit) */}
-                  <td className="px-3 md:px-6 py-3 text-sm text-gray-100">{user.hoten}</td>
+                  <td className="px-3 md:px-6 py-3 text-sm text-gray-100">
+                    {user.hoten}
+                    <input value={user.hoten} type="hidden" />
+                  </td>
 
                   {/* Email */}
                   <td className="px-3 md:px-6 py-3 text-sm text-gray-300">
@@ -282,7 +305,9 @@ const handleHardDelete = async (id) => {
                     {isEditing ? (
                       <input
                         value={editForm.sodienthoai}
-                        onChange={(e) => handleChange("sodienthoai", e.target.value)}
+                        onChange={(e) =>
+                          handleChange("sodienthoai", e.target.value)
+                        }
                         className="bg-[#2f2f2f] text-white px-2 py-1 rounded w-36 text-sm"
                       />
                     ) : (
@@ -313,7 +338,7 @@ const handleHardDelete = async (id) => {
                       >
                         {/* use roles fetched from DB */}
                         {roles.map((r) => (
-                          <option key={r.id} value={r.tenrole}>
+                          <option key={r.id} value={r.id}>
                             {r.tenrole}
                           </option>
                         ))}
@@ -326,7 +351,7 @@ const handleHardDelete = async (id) => {
                             : "bg-green-500/20 text-green-400"
                         }`}
                       >
-                        {user.vaitro || "Customer"}
+                        {user.vaitro}
                       </span>
                     )}
                   </td>
@@ -334,9 +359,13 @@ const handleHardDelete = async (id) => {
                   {/* Trạng thái banned */}
                   <td className="px-3 md:px-6 py-3 text-sm text-gray-300">
                     {user.banned ? (
-                      <span className="text-red-400 font-medium">Đang bị khóa</span>
+                      <span className="text-red-400 font-medium">
+                        Đang bị khóa
+                      </span>
                     ) : (
-                      <span className="text-green-400 font-medium">Hoạt động</span>
+                      <span className="text-green-400 font-medium">
+                        Hoạt động
+                      </span>
                     )}
                   </td>
 
@@ -380,13 +409,18 @@ const handleHardDelete = async (id) => {
                         }`}
                         title={user.banned ? "Mở khóa" : "Khoá (ban)"}
                       >
-                        {user.banned ? <CheckCircle size={16} /> : <Ban size={16} />}
+                        {user.banned ? (
+                          <CheckCircle size={16} />
+                        ) : (
+                          <Ban size={16} />
+                        )}
                       </button>
 
                       {/* Hard delete */}
                       <button
                         onClick={() => {
-                          if (confirm("Xóa hoàn toàn người dùng?")) handleHardDelete(user.id);
+                          if (confirm("Xóa hoàn toàn người dùng?"))
+                            handleHardDelete(user.id);
                         }}
                         className="p-2 rounded hover:bg-white/5 text-red-600"
                         title="Xóa"

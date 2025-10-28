@@ -11,6 +11,7 @@ export async function GET() {
         u.email,
         u.sodienthoai,
         u.diachi,
+        u.role_id,
         r.tenrole AS vaitro,
         CAST(u.banned AS UNSIGNED) AS banned
       FROM thoitrang.\`user\` u

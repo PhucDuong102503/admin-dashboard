@@ -4,17 +4,17 @@ import mysql from "mysql2/promise";
 // ✅ Hàm kết nối MySQL
 async function getConnection() {
   return await mysql.createConnection({
-    host: "localhost",
-    user: "root",
-    password: "123456", // ⚠️ Đổi thành mật khẩu MySQL thật của bạn
-    database: "thoitrang", // ⚠️ Đổi nếu DB bạn có tên khác
+    host: process.env.DB_HOST || "localhost",
+    user: process.env.DB_USER || "root",
+    password: process.env.DB_PASSWORD || "123456",
+    database: process.env.DB_NAME || "thoitrang",
   });
 }
 
 // ✅ Lấy user theo ID (GET /api/users/[id])
 export async function GET(req, contextPromise) {
   const context = await contextPromise;
-  const id = context?.params?.id;
+  const { id } = await context?.params;
 
   if (!id) {
     return NextResponse.json(
@@ -48,9 +48,8 @@ export async function GET(req, contextPromise) {
 }
 
 // ✅ Cập nhật user (PATCH /api/users/[id])
-export async function PATCH(req, contextPromise) {
-  const context = await contextPromise;
-  const id = context?.params?.id;
+export async function PATCH(req, { params }) {
+  const { id } = await params;
 
   if (!id) {
     return NextResponse.json(
@@ -61,15 +60,28 @@ export async function PATCH(req, contextPromise) {
 
   try {
     const body = await req.json();
-    const { name, email, phone, role, status } = body;
+    let { name, email, phone, role_id, address, banned } = body;
 
     const connection = await getConnection();
-    const [result] = await connection.execute(
-      `UPDATE user 
-       SET name = ?, email = ?, phone = ?, role = ?, status = ? 
-       WHERE id = ?`,
-      [name, email, phone, role, status, id]
-    );
+    let result;
+    if (banned !== undefined) {
+      const [resp] = await connection.execute(
+        `UPDATE user 
+         SET banned = ?
+         WHERE id = ?`,
+        [!!banned, id]
+      );
+      result = resp;
+    } else {
+      // if (role === "Customer") role = 2;
+      const [resp] = await connection.execute(
+        `UPDATE user 
+        SET hoten = ?, email = ?, sodienthoai = ?, role_id = ?, diachi = ?
+        WHERE id = ?`,
+        [name, email, phone, role_id, address, id]
+      );
+      result = resp;
+    }
     await connection.end();
 
     if (result.affectedRows === 0) {
@@ -95,7 +107,7 @@ export async function PATCH(req, contextPromise) {
 // ✅ Xóa user (DELETE /api/users/[id])
 export async function DELETE(req, contextPromise) {
   const context = await contextPromise;
-  const id = context?.params?.id;
+  const { id } = await context?.params;
 
   if (!id) {
     return NextResponse.json(
