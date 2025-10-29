@@ -86,6 +86,7 @@ export default function EditProfilePage() {
     if (data.success) {
       const updatedUser = { ...user, ...form };
       localStorage.setItem("user", JSON.stringify(updatedUser));
+      window.dispatchEvent(new Event("storage"));
       setUser(updatedUser);
       alert("✅ Cập nhật thông tin thành công!");
     } else {

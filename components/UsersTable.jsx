@@ -174,7 +174,7 @@ export default function UsersTable() {
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4 md:gap-0">
         <h2 className="text-lg md:text-xl font-semibold text-gray-100 text-center md:text-left">
-          Danh sách người dùng
+          🧾Danh sách người dùng
         </h2>
 
         <div className="relative w-full md:w-64">

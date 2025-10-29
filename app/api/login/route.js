@@ -74,9 +74,16 @@ export async function POST(req) {
 
     // ✅ Trả về response + cookie
     const res = NextResponse.json({
-      message: "Đăng nhập thành công",
-      user: { id: user.id, email: user.email, role: roleName },
-    });
+    message: "Đăng nhập thành công",
+    user: {
+    id: user.id,
+    email: user.email,
+    hoten: user.hoten,
+    hinhanh: user.hinhanh || "/images/admin.jpg",
+    role: roleName,
+  },
+});
+
 
     res.cookies.set("token", token, {
       httpOnly: true,

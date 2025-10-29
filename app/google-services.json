@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "874696475193",
+    "project_id": "appbanhang-fd9f6",
+    "storage_bucket": "appbanhang-fd9f6.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:874696475193:android:ffe944ecef993b2055c3e8",
+        "android_client_info": {
+          "package_name": "com.example.fashionshopapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "874696475193-jr0as2dal5qks12q1j424n9b3124g8ga.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.fashionshopapp",
+            "certificate_hash": "c253edaa84830024c970f76f496535d15234f0a3"
+          }
+        },
+        {
+          "client_id": "874696475193-u90hufr1rcdcsf9hd8j2c6jianag0b8o.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBHCg8GP_WbeQGJJEr_Zqvv0tMj9agPMDE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "874696475193-u90hufr1rcdcsf9hd8j2c6jianag0b8o.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

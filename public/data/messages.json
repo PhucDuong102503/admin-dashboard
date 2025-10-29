@@ -1,0 +1,20 @@
+[
+  {
+    "id": 1,
+    "name": "Nguyễn Văn A",
+    "email": "vana@example.com",
+    "subject": "Cần tư vấn sản phẩm",
+    "message": "Mình muốn hỏi thêm thông tin về áo khoác mã SP2025.",
+    "date": "2025-10-28T10:00:00Z",
+    "read": false
+  },
+  {
+    "id": 2,
+    "name": "Lê Thị B",
+    "email": "leb@example.com",
+    "subject": "Báo lỗi đặt hàng",
+    "message": "Mình đặt hàng nhưng không thấy email xác nhận.",
+    "date": "2025-10-29T02:15:00Z",
+    "read": true
+  }
+]

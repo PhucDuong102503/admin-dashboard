@@ -19,13 +19,18 @@ export default function LoginPage() {
     });
 
     if (res.ok) {
-  const data = await res.json();
+      const data = await res.json();
 
-  // Lưu thông tin người dùng vào localStorage
-  localStorage.setItem("user", JSON.stringify(data.user)); // hoặc data.result[0] tùy API trả về
+      // ✅ Lưu thông tin người dùng vào localStorage
+      localStorage.setItem("user", JSON.stringify(data.user));
+      console.log("User logged in:", data.user);
+      
+      // ✅ Phát tín hiệu để Header cập nhật ngay
+      window.dispatchEvent(new Event("userUpdated"));
 
-  router.push("/overview");
-} else {
+      // ✅ Điều hướng sang trang Dashboard
+      router.push("/overview");
+    } else {
       const data = await res.json();
       setError(data.message || "Đăng nhập thất bại");
     }
