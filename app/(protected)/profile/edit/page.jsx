@@ -67,6 +67,9 @@ export default function EditProfilePage() {
       localStorage.setItem("user", JSON.stringify(updatedUser));
       setUser(updatedUser);
       setPreview(data.url);
+
+      window.dispatchEvent(new Event("userUpdated"));
+
       alert("✅ Đổi ảnh thành công!");
     } else {
       alert("❌ Upload thất bại");
