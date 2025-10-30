@@ -1,10 +1,9 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { getUsers } from "@/services/userService";
 import { sendMessage, listenMessages } from "@/services/messageService";
-import { db } from "@/lib/firebase";
 
 export default function MessagesPage() {
   const [users, setUsers] = useState([]);
@@ -15,39 +14,64 @@ export default function MessagesPage() {
   const messagesEndRef = useRef(null);
   const unsubscribeRef = useRef(null);
 
-  console.log(db)
   useEffect(() => {
     const stored = localStorage.getItem("user");
-    if (stored) {e
+    if (!stored) return;
+
+    try {
       const { id } = JSON.parse(stored);
-      setAdminId(id);
-      fetchUsers();
+      if (id) {
+        setAdminId(String(id));
+      }
+    } catch (error) {
+      console.error("Lỗi khi đọc thông tin admin từ localStorage:", error);
     }
-    return () => {
-      if (unsubscribeRef.current) unsubscribeRef.current();
-    };
   }, []);
 
-  const fetchUsers = async () => {
+  const fetchUsers = useCallback(async () => {
     try {
       const usersData = await getUsers();
       setUsers(usersData || []);
     } catch (err) {
       console.error("Lỗi khi tải danh sách người dùng:", err);
     }
-  };
+  }, []);
 
-  const handleSelectUser = (user) => {
-    setSelectedUser(user);
+  useEffect(() => {
+    if (!adminId) return;
+    fetchUsers();
+  }, [adminId, fetchUsers]);
 
-    // Hủy đăng ký listener cũ nếu có
+  useEffect(() => {
+    if (!adminId || !selectedUser) return;
+
     if (unsubscribeRef.current) unsubscribeRef.current();
 
-    // Lắng nghe tin nhắn mới giữa admin và user
-    unsubscribeRef.current = listenMessages(adminId, user.id, (msgs) => {
-      setMessages(msgs || []);
-      scrollToBottom();
-    });
+    unsubscribeRef.current = listenMessages(adminId, selectedUser.id, (msgs) =>
+      setMessages(msgs || [])
+    );
+
+    return () => {
+      if (unsubscribeRef.current) unsubscribeRef.current();
+    };
+  }, [adminId, selectedUser]);
+
+  useEffect(() => {
+    if (messages.length === 0) return;
+    scrollToBottom();
+  }, [messages]);
+
+  useEffect(
+    () => () => {
+      if (unsubscribeRef.current) unsubscribeRef.current();
+    },
+    []
+  );
+
+  const handleSelectUser = (user) => {
+    if (user.id === selectedUser?.id) return;
+    setSelectedUser(user);
+    setMessages([]);
   };
 
   const handleSend = async () => {
@@ -104,7 +128,8 @@ export default function MessagesPage() {
           <>
             <div className="mb-4">
               <h3 className="text-lg font-semibold">
-                💬 Đang chat với: {selectedUser.hoten || `User ${selectedUser.id}`}
+                💬 Đang chat với:{" "}
+                {selectedUser.hoten || `User ${selectedUser.id}`}
               </h3>
             </div>
 

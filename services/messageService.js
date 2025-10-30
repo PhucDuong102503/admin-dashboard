@@ -6,16 +6,22 @@ import {
   orderBy,
   onSnapshot,
   serverTimestamp,
+  where,
 } from "firebase/firestore";
+
+const buildConversationKey = (a, b) =>
+  [String(a), String(b)].sort((x, y) => x.localeCompare(y)).join("_");
 
 // 🟢 Gửi tin nhắn
 export const sendMessage = async ({ sender_id, receiver_id, content }) => {
   try {
+    const conversationKey = buildConversationKey(sender_id, receiver_id);
     await addDoc(collection(db, "messages"), {
       sender_id: String(sender_id),
       receiver_id: String(receiver_id),
       content,
       created_at: serverTimestamp(),
+      conversationKey,
     });
   } catch (error) {
     console.error("❌ Lỗi khi gửi tin nhắn:", error);
@@ -26,23 +32,28 @@ export const sendMessage = async ({ sender_id, receiver_id, content }) => {
 export const listenMessages = (adminId, userId, callback) => {
   try {
     const messagesRef = collection(db, "messages");
-    const q = query(messagesRef, orderBy("created_at", "asc"));
+    const conversationKey = buildConversationKey(adminId, userId);
+    // console.log("🧩 conversationKey", buildConversationKey(adminId, userId));
 
+    const q = query(
+      messagesRef,
+      where("conversationKey", "==", conversationKey),
+      orderBy("created_at", "asc")
+    );
+
+    // console.log(q);
+
+    // const unsubscribe = onSnapshot(q, (snapshot) => {
+    //   const msgs = snapshot.docs.map((doc) => ({
+    //     id: doc.id,
+    //     ...doc.data(),
+    //   }));
+    //   callback(msgs);
+    // });
     const unsubscribe = onSnapshot(q, (snapshot) => {
-      const allMsgs = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-
-      // 🔍 Lọc lại chỉ lấy tin nhắn giữa admin và user
-      const msgs = allMsgs.filter(
-        (msg) =>
-          (msg.sender_id === String(adminId) &&
-            msg.receiver_id === String(userId)) ||
-          (msg.sender_id === String(userId) &&
-            msg.receiver_id === String(adminId))
-      );
-
+      // console.log("📦 Snapshot size:", snapshot.size);
+      snapshot.docs.forEach((d) => console.log("🔥", d.data()));
+      const msgs = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
       callback(msgs);
     });
 
