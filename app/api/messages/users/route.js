@@ -15,7 +15,6 @@ export async function GET() {
       ORDER BY u.id DESC
     `);
 
-    // Đảm bảo ảnh đại diện luôn có giá trị
     const users = rows.map((u) => ({
       ...u,
       hinhanh: u.hinhanh || "/images/default-avatar.jpg",

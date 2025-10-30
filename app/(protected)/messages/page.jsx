@@ -1,9 +1,10 @@
 "use client";
 
-import Image from "next/image";
 import React, { useEffect, useRef, useState } from "react";
+import Image from "next/image";
 import { getUsers } from "@/services/userService";
 import { sendMessage, listenMessages } from "@/services/messageService";
+import { db } from "@/lib/firebase";
 
 export default function MessagesPage() {
   const [users, setUsers] = useState([]);
@@ -14,9 +15,10 @@ export default function MessagesPage() {
   const messagesEndRef = useRef(null);
   const unsubscribeRef = useRef(null);
 
+  console.log(db)
   useEffect(() => {
     const stored = localStorage.getItem("user");
-    if (stored) {
+    if (stored) {e
       const { id } = JSON.parse(stored);
       setAdminId(id);
       fetchUsers();
@@ -27,28 +29,39 @@ export default function MessagesPage() {
   }, []);
 
   const fetchUsers = async () => {
-    const users = await getUsers();
-    setUsers(users);
+    try {
+      const usersData = await getUsers();
+      setUsers(usersData || []);
+    } catch (err) {
+      console.error("Lỗi khi tải danh sách người dùng:", err);
+    }
   };
 
   const handleSelectUser = (user) => {
     setSelectedUser(user);
+
+    // Hủy đăng ký listener cũ nếu có
     if (unsubscribeRef.current) unsubscribeRef.current();
 
+    // Lắng nghe tin nhắn mới giữa admin và user
     unsubscribeRef.current = listenMessages(adminId, user.id, (msgs) => {
-      setMessages(msgs);
+      setMessages(msgs || []);
       scrollToBottom();
     });
   };
 
   const handleSend = async () => {
     if (!content.trim() || !selectedUser || !adminId) return;
-    await sendMessage({
-      sender_id: adminId,
-      receiver_id: selectedUser.id,
-      content,
-    });
-    setContent("");
+    try {
+      await sendMessage({
+        sender_id: adminId,
+        receiver_id: selectedUser.id,
+        content,
+      });
+      setContent("");
+    } catch (err) {
+      console.error("Lỗi khi gửi tin nhắn:", err);
+    }
   };
 
   const scrollToBottom = () => {
@@ -60,25 +73,29 @@ export default function MessagesPage() {
       {/* Danh sách người dùng */}
       <div className="w-1/3 border-r border-gray-700 p-4 overflow-y-auto">
         <h2 className="text-lg font-bold mb-4">👥 Người dùng</h2>
-        {users.map((user) => (
-          <div
-            key={user.id}
-            onClick={() => handleSelectUser(user)}
-            className={`flex items-center gap-3 px-3 py-2 rounded cursor-pointer hover:bg-[#2a2a2a] ${
-              selectedUser?.id === user.id ? "bg-[#2a2a2a]" : ""
-            }`}
-          >
-            <Image
-              src={user.hinhanh || "/images/default-avatar.jpg"}
-              alt="Avatar"
-              width={32}
-              height={32}
-              className="rounded-full object-cover"
-              unoptimized
-            />
-            <span className="text-sm">{user.hoten || `User ${user.id}`}</span>
-          </div>
-        ))}
+        {users.length > 0 ? (
+          users.map((user) => (
+            <div
+              key={user.id}
+              onClick={() => handleSelectUser(user)}
+              className={`flex items-center gap-3 px-3 py-2 rounded cursor-pointer hover:bg-[#2a2a2a] ${
+                selectedUser?.id === user.id ? "bg-[#2a2a2a]" : ""
+              }`}
+            >
+              <Image
+                src={user.hinhanh || "/images/default-avatar.jpg"}
+                alt="Avatar"
+                width={32}
+                height={32}
+                className="rounded-full object-cover"
+                unoptimized
+              />
+              <span className="text-sm">{user.hoten || `User ${user.id}`}</span>
+            </div>
+          ))
+        ) : (
+          <p className="text-gray-400 text-sm">Không có người dùng nào.</p>
+        )}
       </div>
 
       {/* Khung chat */}
@@ -103,7 +120,13 @@ export default function MessagesPage() {
                 >
                   {msg.content}
                   <div className="text-[10px] text-gray-300 mt-1 text-right">
-                    {new Date(msg.created_at?.seconds * 1000).toLocaleString("vi-VN")}
+                    {msg.created_at
+                      ? new Date(
+                          msg.created_at.seconds
+                            ? msg.created_at.seconds * 1000
+                            : msg.created_at
+                        ).toLocaleString("vi-VN")
+                      : ""}
                   </div>
                 </div>
               ))}
@@ -127,7 +150,9 @@ export default function MessagesPage() {
             </div>
           </>
         ) : (
-          <p className="text-gray-400 text-sm">Chọn người dùng để bắt đầu trò chuyện.</p>
+          <p className="text-gray-400 text-sm">
+            Chọn người dùng để bắt đầu cuộc trò chuyện.
+          </p>
         )}
       </div>
     </div>

@@ -2,39 +2,39 @@ import pool from "@/lib/connect";
 
 export async function GET() {
   try {
-    // Doanh thu tháng hiện tại
+    // Doanh thu tháng hiện tại (chỉ đơn đã giao)
     const [currentRevenueRows] = await pool.execute(`
       SELECT SUM(tongtien) AS currentRevenue
       FROM thoitrang.donhang
       WHERE MONTH(ngaydathang) = MONTH(NOW()) AND YEAR(ngaydathang) = YEAR(NOW())
-        AND trangthai != 'đã hủy đơn'
+        AND trangthai = 'Đã giao hàng'
     `);
 
-    // Doanh thu tháng trước
+    // Doanh thu tháng trước (chỉ đơn đã giao)
     const [previousRevenueRows] = await pool.execute(`
       SELECT SUM(tongtien) AS previousRevenue
       FROM thoitrang.donhang
       WHERE MONTH(ngaydathang) = MONTH(DATE_SUB(NOW(), INTERVAL 1 MONTH))
         AND YEAR(ngaydathang) = YEAR(DATE_SUB(NOW(), INTERVAL 1 MONTH))
-        AND trangthai != 'đã hủy đơn'
+        AND trangthai = 'Đã giao hàng'
     `);
 
-    // Tổng số đơn hàng tháng hiện tại
+    // Tổng số đơn hàng tháng hiện tại (chỉ đơn đã giao)
     const [orderRows] = await pool.execute(`
       SELECT COUNT(*) AS totalOrders
       FROM thoitrang.donhang
       WHERE MONTH(ngaydathang) = MONTH(NOW()) AND YEAR(ngaydathang) = YEAR(NOW())
-        AND trangthai != 'đã hủy đơn'
+        AND trangthai = 'Đã giao hàng'
     `);
 
-    // Tổng sản phẩm bán ra tháng hiện tại
+    // Tổng sản phẩm bán ra tháng hiện tại (chỉ đơn đã giao)
     const [productRows] = await pool.execute(`
       SELECT SUM(soluong) AS totalProducts
       FROM thoitrang.chitietdonhang
       WHERE donhang_id IN (
         SELECT id FROM thoitrang.donhang
         WHERE MONTH(ngaydathang) = MONTH(NOW()) AND YEAR(ngaydathang) = YEAR(NOW())
-          AND trangthai != 'đã hủy đơn'
+          AND trangthai = 'Đã giao hàng'
       )
     `);
 
@@ -53,13 +53,11 @@ export async function GET() {
         ? 100
         : 0;
 
-    // Biểu đồ doanh thu theo tháng
     const salesOverview = [
       { label: "Tháng trước", value: previousRevenue },
       { label: "Tháng này", value: currentRevenue },
     ];
 
-    // Phân loại sản phẩm (giả lập)
     const categoryDistribution = [
       { label: "Áo", value: 49 },
       { label: "Quần", value: 10 },
