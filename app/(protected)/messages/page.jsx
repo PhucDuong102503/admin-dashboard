@@ -2,6 +2,8 @@
 
 import Image from "next/image";
 import React, { useEffect, useRef, useState } from "react";
+import { getUsers } from "@/services/userService";
+import { sendMessage, listenMessages } from "@/services/messageService";
 
 export default function MessagesPage() {
   const [users, setUsers] = useState([]);
@@ -10,6 +12,7 @@ export default function MessagesPage() {
   const [content, setContent] = useState("");
   const [adminId, setAdminId] = useState(null);
   const messagesEndRef = useRef(null);
+  const unsubscribeRef = useRef(null);
 
   useEffect(() => {
     const stored = localStorage.getItem("user");
@@ -18,63 +21,34 @@ export default function MessagesPage() {
       setAdminId(id);
       fetchUsers();
     }
+    return () => {
+      if (unsubscribeRef.current) unsubscribeRef.current();
+    };
   }, []);
 
   const fetchUsers = async () => {
-    try {
-      const res = await fetch("/api/messages/users");
-      const data = await res.json();
-      if (data.success) {
-        setUsers(data.users || []);
-      }
-    } catch (error) {
-      console.error("❌ Lỗi khi lấy danh sách người dùng:", error);
-    }
-  };
-
-  const fetchMessages = async (userId) => {
-    if (!adminId) return;
-    try {
-      const res = await fetch(
-        `/api/messages?sender_id=${userId}&receiver_id=${adminId}`
-      );
-      const data = await res.json();
-      if (data.success) {
-        setMessages(data.messages.reverse());
-        scrollToBottom();
-      }
-    } catch (error) {
-      console.error("❌ Lỗi khi lấy tin nhắn:", error);
-    }
+    const users = await getUsers();
+    setUsers(users);
   };
 
   const handleSelectUser = (user) => {
     setSelectedUser(user);
-    fetchMessages(user.id);
+    if (unsubscribeRef.current) unsubscribeRef.current();
+
+    unsubscribeRef.current = listenMessages(adminId, user.id, (msgs) => {
+      setMessages(msgs);
+      scrollToBottom();
+    });
   };
 
   const handleSend = async () => {
     if (!content.trim() || !selectedUser || !adminId) return;
-
-    try {
-      const res = await fetch("/api/messages", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          sender_id: adminId,
-          receiver_id: selectedUser.id,
-          content,
-        }),
-      });
-
-      const data = await res.json();
-      if (data.success) {
-        setContent("");
-        fetchMessages(selectedUser.id);
-      }
-    } catch (error) {
-      console.error("❌ Lỗi khi gửi tin nhắn:", error);
-    }
+    await sendMessage({
+      sender_id: adminId,
+      receiver_id: selectedUser.id,
+      content,
+    });
+    setContent("");
   };
 
   const scrollToBottom = () => {
@@ -129,7 +103,7 @@ export default function MessagesPage() {
                 >
                   {msg.content}
                   <div className="text-[10px] text-gray-300 mt-1 text-right">
-                    {new Date(msg.created_at).toLocaleString("vi-VN")}
+                    {new Date(msg.created_at?.seconds * 1000).toLocaleString("vi-VN")}
                   </div>
                 </div>
               ))}
