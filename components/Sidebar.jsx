@@ -1,5 +1,6 @@
 "use client";
 
+import React, { useState, useEffect } from "react";
 import {
   LayoutDashboard,
   Package,
@@ -14,23 +15,48 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import React, { useState } from "react";
-
-const sidebarItems = [
-  { name: "Dashboard", href: "/", icon: LayoutDashboard },
-  { name: "Products", href: "/products", icon: Package },
-  { name: "Clients", href: "/users", icon: Users },
-  { name: "Sales", href: "/sales", icon: LineChart },
-  { name: "Orders", href: "/orders", icon: ClipboardList },
-  { name: "Settings", href: "/settings", icon: Settings },
-  { name: "Messages", href: "/messages", icon: Mail },
-  { name: "Notifications", href: "/notifications", icon: Bell },
-  { name: "Help", href: "/help", icon: HelpCircle }
-];
 
 const Sidebar = () => {
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user");
+    if (!storedUser) return;
+    const { id } = JSON.parse(storedUser);
+
+    fetch(`/api/notifications/unread?admin_id=${id}`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success) setUnreadCount(data.total);
+      });
+  }, []);
+
+  const sidebarItems = [
+    { name: "Dashboard", href: "/overview", icon: LayoutDashboard },
+    { name: "Products", href: "/products", icon: Package },
+    { name: "Clients", href: "/users", icon: Users },
+    { name: "Sales", href: "/sales", icon: LineChart },
+    { name: "Orders", href: "/orders", icon: ClipboardList },
+    { name: "Settings", href: "/setting", icon: Settings },
+    { name: "Messages", href: "/messages", icon: Mail },
+    {
+      name: "Notifications",
+      href: "/notifications",
+      icon: () => (
+        <div className="relative">
+          <Bell size={20} />
+          {unreadCount > 0 && (
+            <span className="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] px-1.5 py-0.5 rounded-full">
+              {unreadCount}
+            </span>
+          )}
+        </div>
+      )
+    },
+    { name: "Help", href: "/help", icon: HelpCircle }
+  ];
 
   return (
     <aside
@@ -54,8 +80,11 @@ const Sidebar = () => {
       {/* Menu */}
       <nav className="mt-4 space-y-2 px-2">
         {sidebarItems.map((item) => {
-          const Icon = item.icon;
           const isActive = pathname === item.href;
+          const Icon =
+            typeof item.icon === "function"
+              ? item.icon
+              : () => <item.icon size={20} />;
           return (
             <Link key={item.name} href={item.href}>
               <div
@@ -63,7 +92,7 @@ const Sidebar = () => {
                   isActive ? "bg-[#2f2f2f]" : "hover:bg-[#2f2f2f]"
                 }`}
               >
-                <Icon size={20} className="min-w-[20px]" />
+                <Icon />
                 {!collapsed && (
                   <span className="ml-4 whitespace-nowrap">{item.name}</span>
                 )}

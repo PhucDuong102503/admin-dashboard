@@ -19,6 +19,16 @@ export default function LoginPage() {
     });
 
     if (res.ok) {
+      const data = await res.json();
+
+      // ✅ Lưu thông tin người dùng vào localStorage
+      localStorage.setItem("user", JSON.stringify(data.user));
+      console.log("User logged in:", data.user);
+      
+      // ✅ Phát tín hiệu để Header cập nhật ngay
+      window.dispatchEvent(new Event("userUpdated"));
+
+      // ✅ Điều hướng sang trang Dashboard
       router.push("/overview");
     } else {
       const data = await res.json();

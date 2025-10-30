@@ -3,13 +3,13 @@ import pool from "@/lib/connect";
 export async function GET() {
   try {
     const [rows] = await pool.execute(`
-      SELECT
-        (SELECT SUM(tongtien) FROM thoitrang.donhang) AS totalSales,
-        (SELECT COUNT(*) FROM thoitrang.user) AS totalClients,
-        (SELECT COUNT(*) FROM thoitrang.sanpham) AS totalProducts,
-        (SELECT SUM(soluong) FROM thoitrang.sanpham_size) AS stock
-      FROM dual
-    `);
+  SELECT
+    (SELECT SUM(tongtien) FROM thoitrang.donhang WHERE trangthai = 'Đã giao hàng') AS totalSales,
+    (SELECT COUNT(*) FROM thoitrang.user) AS totalClients,
+    (SELECT COUNT(*) FROM thoitrang.sanpham) AS totalProducts,
+    (SELECT SUM(soluong) FROM thoitrang.sanpham_size) AS stock
+  FROM dual
+`);
 
     return Response.json(rows[0]);
   } catch (error) {

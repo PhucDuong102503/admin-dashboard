@@ -4,11 +4,12 @@ export async function GET() {
   try {
     const [rows] = await pool.execute(`
       SELECT
-        DATE_FORMAT(ngaydathang, '%Y-%m') AS month,
-        SUM(tongtien) AS sales
-      FROM thoitrang.donhang
-      GROUP BY month
-      ORDER BY month ASC
+    DATE_FORMAT(ngaydathang, '%Y-%m') AS month,
+    SUM(tongtien) AS sales
+  FROM thoitrang.donhang
+  WHERE trangthai = 'Đã giao hàng'
+  GROUP BY month
+  ORDER BY month ASC
     `);
 
     return Response.json(rows);
