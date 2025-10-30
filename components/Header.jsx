@@ -26,10 +26,7 @@ const fetchUnreadNotifications = async () => {
   if (data.success) setUnreadCount(data.total);
 };
 
-  const [userInfo, setUserInfo] = useState({
-    hoten: "Admin",
-    hinhanh: "/images/admin.jpg",
-  });
+  const [userInfo, setUserInfo] = useState({});
 
   // ✅ Hàm load thông tin user
   const loadUserInfo = () => {
@@ -37,8 +34,8 @@ const fetchUnreadNotifications = async () => {
     if (storedUser) {
       const parsed = JSON.parse(storedUser);
       setUserInfo({
-        hoten: parsed.hoten || "Admin",
-        hinhanh: parsed.hinhanh || "/images/admin.jpg",
+        hoten: parsed.hoten,
+        hinhanh: parsed.hinhanh,
       });
     }
   };

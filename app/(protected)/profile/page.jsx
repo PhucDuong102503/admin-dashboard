@@ -31,7 +31,7 @@ export default function ProfilePage() {
       <h2 className="text-2xl font-bold mb-6">Thông tin tài khoản</h2>
       <div className="flex items-center space-x-6">
         <Image
-          src={user.hinhanh || "/images/admin.jpg"}
+          src={user.hinhanh}
           alt="Avatar"
           width={80}
           height={80}
