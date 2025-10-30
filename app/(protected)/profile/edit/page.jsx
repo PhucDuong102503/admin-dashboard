@@ -36,7 +36,7 @@ export default function EditProfilePage() {
             sodienthoai: data.user.sodienthoai || "",
             diachi: data.user.diachi || "",
           });
-          setPreview(data.user.hinhanh || "/images/admin.jpg");
+          setPreview(data.user.hinhanh);
         }
       });
   }, []);
