@@ -26,7 +26,7 @@ export async function POST(req) {
 
     // ✅ Truy vấn user và role
     const [rows] = await pool.execute(
-      `SELECT u.id, u.email, u.matkhau, u.hoten, u.role_id, r.tenrole
+      `SELECT u.id, u.email, u.matkhau, u.hoten, u.role_id, u.hinhanh, r.tenrole
        FROM user u
        LEFT JOIN role r ON u.role_id = r.id
        WHERE u.email = ? LIMIT 1`,
@@ -74,16 +74,15 @@ export async function POST(req) {
 
     // ✅ Trả về response + cookie
     const res = NextResponse.json({
-    message: "Đăng nhập thành công",
-    user: {
-    id: user.id,
-    email: user.email,
-    hoten: user.hoten,
-    hinhanh: user.hinhanh || "/images/admin.jpg",
-    role: roleName,
-  },
-});
-
+      message: "Đăng nhập thành công",
+      user: {
+        id: user.id,
+        email: user.email,
+        hoten: user.hoten,
+        hinhanh: user.hinhanh,
+        role: roleName,
+      },
+    });
 
     res.cookies.set("token", token, {
       httpOnly: true,
