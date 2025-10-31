@@ -107,7 +107,11 @@ export default function MessagesPage() {
               }`}
             >
               <Image
-                src={user.hinhanh || "/images/default-avatar.jpg"}
+                src={
+                  user.hinhanh?.startsWith("http")
+                    ? user.hinhanh
+                    : "/images/default-avatar.jpg"
+                }
                 alt="Avatar"
                 width={32}
                 height={32}

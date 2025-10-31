@@ -1,7 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  /* config options here */
-  reactCompiler: true,
+  images: {
+    domains: ["firebasestorage.googleapis.com", "imgur.com"],
+  },
 };
 
 export default nextConfig;

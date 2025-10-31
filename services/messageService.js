@@ -23,6 +23,7 @@ export const sendMessage = async ({ sender_id, receiver_id, content }) => {
       created_at: serverTimestamp(),
       conversationKey,
     });
+    await addDoc(collection(db, "users"), {});
   } catch (error) {
     console.error("❌ Lỗi khi gửi tin nhắn:", error);
   }
