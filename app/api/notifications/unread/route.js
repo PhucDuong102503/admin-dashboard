@@ -1,26 +1,45 @@
-import { NextResponse } from "next/server";
-import pool from "@/lib/connect";
+import { db } from "@/lib/firebase";
+import { collection, query, where, getDocs } from "firebase/firestore";
 
-export async function GET(req) {
+export async function GET(request) {
   try {
-    const { searchParams } = new URL(req.url);
-    const adminId = parseInt(searchParams.get("admin_id"), 10);
+    const { searchParams } = new URL(request.url);
+    const adminId = searchParams.get("admin_id");
 
     if (!adminId) {
-      return NextResponse.json({ success: false, message: "Thiếu admin_id" }, { status: 400 });
+      return Response.json(
+        { success: false, message: "Thiếu admin_id" },
+        { status: 400 }
+      );
     }
 
-    const [rows] = await pool.execute(
-      `SELECT COUNT(*) AS total
-       FROM messages m
-       JOIN user u ON m.sender_id = u.id
-       WHERE m.receiver_id = ? AND m.is_read = 0 AND u.role_id != 1`,
-      [adminId]
+    const q = query(
+      collection(db, "messages"),
+      where("receiver_id", "==", adminId),
+      where("read", "==", false)
     );
 
-    return NextResponse.json({ success: true, total: rows[0].total });
+    const snapshot = await getDocs(q);
+    const unreadMessages = snapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
+
+    const senders = Array.from(
+      new Set(unreadMessages.map((msg) => msg.sender_id))
+    );
+
+    return Response.json({
+      success: true,
+      total: unreadMessages.length,
+      senders,
+      messages: unreadMessages,
+    });
   } catch (error) {
-    console.error("❌ Lỗi server /api/notifications/unread:", error);
-    return NextResponse.json({ success: false, message: "Lỗi server" }, { status: 500 });
+    console.error("❌ Lỗi khi lấy thông báo chưa đọc:", error);
+    return Response.json(
+      { success: false, message: "Lỗi server" },
+      { status: 500 }
+    );
   }
 }

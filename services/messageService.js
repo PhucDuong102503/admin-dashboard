@@ -22,6 +22,7 @@ export const sendMessage = async ({ sender_id, receiver_id, content }) => {
       content,
       created_at: serverTimestamp(),
       conversationKey,
+      read: false,
     });
     await addDoc(collection(db, "users"), {});
   } catch (error) {

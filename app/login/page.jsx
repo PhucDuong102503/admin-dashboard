@@ -24,7 +24,7 @@ export default function LoginPage() {
       // ✅ Lưu thông tin người dùng vào localStorage
       localStorage.setItem("user", JSON.stringify(data.user));
       console.log("User logged in:", data.user);
-      
+
       // ✅ Phát tín hiệu để Header cập nhật ngay
       window.dispatchEvent(new Event("userUpdated"));
 
@@ -64,12 +64,24 @@ export default function LoginPage() {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
         />
+
         <button
           type="submit"
           className="w-full py-2 rounded bg-blue-600 text-white font-semibold hover:bg-blue-700 transition"
         >
           Đăng nhập
         </button>
+
+        {/* ✅ Liên kết quên mật khẩu */}
+        <div className="text-center mt-3">
+          <button
+            type="button"
+            onClick={() => router.push("/forgot-password")}
+            className="text-sm text-blue-400 hover:underline"
+          >
+            Quên mật khẩu?
+          </button>
+        </div>
       </form>
     </div>
   );

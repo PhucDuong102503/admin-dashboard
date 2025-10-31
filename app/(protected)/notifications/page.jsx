@@ -10,10 +10,20 @@ export default function NotificationsPage() {
     if (!storedUser) return;
     const { id } = JSON.parse(storedUser);
 
-    fetch(`/api/messages/unread?admin_id=${id}`)
+    // ✅ Gọi API lấy tin nhắn chưa đọc
+    fetch(`/api/notifications/unread?admin_id=${id}`)
       .then((res) => res.json())
       .then((data) => {
-        if (data.success) setMessages(data.messages);
+        if (data.success) {
+          setMessages(data.messages);
+
+          // ✅ Gọi API đánh dấu là đã đọc
+          fetch("/api/notifications/mark-read", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ admin_id: id }),
+          });
+        }
       });
   }, []);
 
