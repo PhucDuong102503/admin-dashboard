@@ -12,14 +12,14 @@ export async function GET() {
         u.sodienthoai,
         u.diachi,
         u.role_id,
-        r.tenrole AS tenrole,   -- ✅ Đổi alias này để trùng với frontend
+        r.tenrole AS tenrole,   
         CAST(u.banned AS UNSIGNED) AS banned
       FROM thoitrang.\`user\` u
       LEFT JOIN thoitrang.\`role\` r ON u.role_id = r.id
       ORDER BY u.id DESC
     `);
 
-    // đảm bảo banned là số 0/1
+    // banned là số 0/1
     const users = rows.map((u) => ({
       ...u,
       banned: Number(u.banned) || 0,

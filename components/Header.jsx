@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import vn from "../public/vn.png";
 import admin from "../public/images/admin.jpg";
 import { Bell, LogOut, Settings, User } from "lucide-react";
-
+import { listenUnreadNotifications } from "@/services/notificationService";
 
 export default function Header() {
   const [openMenu, setOpenMenu] = useState(false);
@@ -16,15 +16,15 @@ export default function Header() {
   // ✅ State để lưu số thông báo chưa đọc
   const [unreadCount, setUnreadCount] = useState(0);
 
-const fetchUnreadNotifications = async () => {
-  const storedUser = localStorage.getItem("user");
-  if (!storedUser) return;
-  const { id } = JSON.parse(storedUser);
+  const fetchUnreadNotifications = async () => {
+    const storedUser = localStorage.getItem("user");
+    if (!storedUser) return;
+    const { id } = JSON.parse(storedUser);
 
-  const res = await fetch(`/api/notifications/unread?admin_id=${id}`);
-  const data = await res.json();
-  if (data.success) setUnreadCount(data.total);
-};
+    const res = await fetch(`/api/notifications/unread?admin_id=${id}`);
+    const data = await res.json();
+    if (data.success) setUnreadCount(data.total);
+  };
 
   const [userInfo, setUserInfo] = useState({});
 
@@ -40,24 +40,37 @@ const fetchUnreadNotifications = async () => {
     }
   };
 
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user");
+    if (!storedUser) return;
+    const { id } = JSON.parse(storedUser);
+
+    // 🔥 Lắng nghe realtime thông báo
+    const unsubscribe = listenUnreadNotifications(id, (count) => {
+      setUnreadCount(count);
+    });
+
+    return () => unsubscribe();
+  }, []);
+
   // ✅ Lắng nghe cả thay đổi localStorage và sự kiện userUpdated
   useEffect(() => {
-  loadUserInfo();
-  fetchUnreadNotifications();
-
-  const handleUpdate = () => {
     loadUserInfo();
     fetchUnreadNotifications();
-  };
 
-  window.addEventListener("storage", handleUpdate);
-  window.addEventListener("userUpdated", handleUpdate);
+    const handleUpdate = () => {
+      loadUserInfo();
+      fetchUnreadNotifications();
+    };
 
-  return () => {
-    window.removeEventListener("storage", handleUpdate);
-    window.removeEventListener("userUpdated", handleUpdate);
-  };
-}, []);
+    window.addEventListener("storage", handleUpdate);
+    window.addEventListener("userUpdated", handleUpdate);
+
+    return () => {
+      window.removeEventListener("storage", handleUpdate);
+      window.removeEventListener("userUpdated", handleUpdate);
+    };
+  }, []);
 
   // ✅ Đóng dropdown khi click ra ngoài
   useEffect(() => {
@@ -90,18 +103,18 @@ const fetchUnreadNotifications = async () => {
             height={18}
             className="rounded-full"
           />
-          
+
           <div className="relative">
-  <Bell
-    className="w-5 h-5 text-gray-300 hover:text-white cursor-pointer"
-    onClick={() => router.push("/notifications")}
-  />
-  {unreadCount > 0 && (
-    <span className="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] px-1.5 py-0.5 rounded-full">
-      {unreadCount}
-    </span>
-  )}
-</div>
+            <Bell
+              className="w-5 h-5 text-gray-300 hover:text-white cursor-pointer"
+              onClick={() => router.push("/notifications")}
+            />
+            {unreadCount > 0 && (
+              <span className="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] px-1.5 py-0.5 rounded-full">
+                {unreadCount}
+              </span>
+            )}
+          </div>
 
           {/* Avatar + Tên Admin */}
           <div

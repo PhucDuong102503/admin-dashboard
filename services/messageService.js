@@ -16,15 +16,19 @@ const buildConversationKey = (a, b) =>
 export const sendMessage = async ({ sender_id, receiver_id, content }) => {
   try {
     const conversationKey = buildConversationKey(sender_id, receiver_id);
-    await addDoc(collection(db, "messages"), {
+
+    const data = {
       sender_id: String(sender_id),
       receiver_id: String(receiver_id),
       content,
       created_at: serverTimestamp(),
       conversationKey,
       read: false,
-    });
-    await addDoc(collection(db, "users"), {});
+    };
+
+    console.log("📩 Dữ liệu gửi Firestore:", data);
+
+    await addDoc(collection(db, "messages"), data);
   } catch (error) {
     console.error("❌ Lỗi khi gửi tin nhắn:", error);
   }
@@ -35,7 +39,6 @@ export const listenMessages = (adminId, userId, callback) => {
   try {
     const messagesRef = collection(db, "messages");
     const conversationKey = buildConversationKey(adminId, userId);
-    // console.log("🧩 conversationKey", buildConversationKey(adminId, userId));
 
     const q = query(
       messagesRef,
@@ -43,17 +46,7 @@ export const listenMessages = (adminId, userId, callback) => {
       orderBy("created_at", "asc")
     );
 
-    // console.log(q);
-
-    // const unsubscribe = onSnapshot(q, (snapshot) => {
-    //   const msgs = snapshot.docs.map((doc) => ({
-    //     id: doc.id,
-    //     ...doc.data(),
-    //   }));
-    //   callback(msgs);
-    // });
     const unsubscribe = onSnapshot(q, (snapshot) => {
-      // console.log("📦 Snapshot size:", snapshot.size);
       snapshot.docs.forEach((d) => console.log("🔥", d.data()));
       const msgs = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
       callback(msgs);

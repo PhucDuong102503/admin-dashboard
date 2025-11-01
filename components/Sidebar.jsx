@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { listenUnreadNotifications } from "@/services/notificationService";
 import {
   LayoutDashboard,
   Package,
@@ -11,7 +12,7 @@ import {
   Mail,
   Bell,
   HelpCircle,
-  Menu
+  Menu,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -26,11 +27,11 @@ const Sidebar = () => {
     if (!storedUser) return;
     const { id } = JSON.parse(storedUser);
 
-    fetch(`/api/notifications/unread?admin_id=${id}`)
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.success) setUnreadCount(data.total);
-      });
+    const unsubscribe = listenUnreadNotifications(id, (count) => {
+      setUnreadCount(count);
+    });
+
+    return () => unsubscribe();
   }, []);
 
   const sidebarItems = [
@@ -53,9 +54,9 @@ const Sidebar = () => {
             </span>
           )}
         </div>
-      )
+      ),
     },
-    { name: "Help", href: "/help", icon: HelpCircle }
+    { name: "Help", href: "/help", icon: HelpCircle },
   ];
 
   return (
@@ -72,9 +73,7 @@ const Sidebar = () => {
         >
           <Menu size={20} />
         </button>
-        {!collapsed && (
-          <span className="text-lg font-bold">Fashion Shop</span>
-        )}
+        {!collapsed && <span className="text-lg font-bold">Fashion Shop</span>}
       </div>
 
       {/* Menu */}
