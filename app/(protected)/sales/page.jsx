@@ -57,28 +57,30 @@ const SalesPage = () => {
           className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4 mb-8"
         >
           <StatCard
-  name="Total Revenue"
-  icon={DollarSign}
-  value={`${Number(stats.totalRevenue).toLocaleString("vi-VN")} ₫`}
-/>
+            name="Total Revenue (Month)"
+            icon={DollarSign}
+            value={`${Number(stats.totalRevenue).toLocaleString("vi-VN")} ₫`}
+          />
 
-<StatCard
-  name="Avg. Order Value"
-  icon={ShoppingCart}
-  value={`${Number(stats.averageOrderValue).toLocaleString("vi-VN")} ₫`}
-/>
+          <StatCard
+            name="Avg. Order Value (Month)"
+            icon={ShoppingCart}
+            value={`${Number(stats.averageOrderValue).toLocaleString(
+              "vi-VN"
+            )} ₫`}
+          />
 
-<StatCard
-  name="Total Sales"
-  icon={CreditCard}
-  value={`${stats.totalSales} sản phẩm`}
-/>
+          <StatCard
+            name="Total Sales (Month)"
+            icon={CreditCard}
+            value={`${stats.totalSales} sản phẩm`}
+          />
 
-<StatCard
-  name="Total Growth"
-  icon={TrendingUp}
-  value={stats.totalGrowth}
-/>
+          <StatCard
+            name="Total Growth (Month)"
+            icon={TrendingUp}
+            value={stats.totalGrowth}
+          />
         </motion.div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
