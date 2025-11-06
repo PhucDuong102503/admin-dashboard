@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Sidebar from "@/components/Sidebar";
 import Header from "@/components/Header";
+import AiChatWidget from "@/components/AiChatWidget";
 
 export default function ProtectedLayout({ children }) {
   const router = useRouter();
@@ -46,6 +47,7 @@ export default function ProtectedLayout({ children }) {
         <Header />
         <main className="flex-1 px-6 py-6 max-w-7xl mx-auto w-full">
           {children}
+          <AiChatWidget />
         </main>
       </div>
     </div>
