@@ -13,6 +13,7 @@ import {
   Bell,
   HelpCircle,
   Menu,
+  Archive, // ⭐ 1. Đã import icon mới
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -37,6 +38,7 @@ const Sidebar = () => {
   const sidebarItems = [
     { name: "Dashboard", href: "/overview", icon: LayoutDashboard },
     { name: "Products", href: "/products", icon: Package },
+    { name: "Inventory", href: "/inventory", icon: Archive },
     { name: "Clients", href: "/users", icon: Users },
     { name: "Sales", href: "/sales", icon: LineChart },
     { name: "Orders", href: "/orders", icon: ClipboardList },
@@ -79,7 +81,11 @@ const Sidebar = () => {
       {/* Menu */}
       <nav className="mt-4 space-y-2 px-2">
         {sidebarItems.map((item) => {
-          const isActive = pathname === item.href;
+          // Cải thiện logic active để highlight đúng cả khi ở trang con
+          const isActive =
+            item.href === "/"
+              ? pathname === "/"
+              : pathname.startsWith(item.href);
           const Icon =
             typeof item.icon === "function"
               ? item.icon

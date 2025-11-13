@@ -26,7 +26,10 @@ export async function POST(req) {
 
     const imageUrl = `/uploads/${filename}`;
 
-    await pool.query("UPDATE user SET hinhanh = ? WHERE id = ?", [imageUrl, userId]);
+    await pool.query("UPDATE user SET hinhanh = ? WHERE id = ?", [
+      imageUrl,
+      userId,
+    ]);
 
     return NextResponse.json({ success: true, url: imageUrl });
   } catch (error) {
